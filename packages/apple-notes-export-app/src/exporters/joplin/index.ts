@@ -30,7 +30,7 @@ export async function exportNote(
   let markdown = ""
   let noteFilePath = resolveFilePathUnique(
     outputDir,
-    safeFileName(noteTitle(note))
+    safeFileName(noteTitle(note))+'.md'
   )
   const tags = ['Apple Notes']
   if (note.folder && note.folder.name) {
@@ -52,8 +52,8 @@ export async function exportNote(
   markdown = await NodeHtmlMarkdown.translate(html, options)
   // markdown = saveImages(markdown, noteFilePath)
   // markdown = await AgentMarkdown.produce(html)
+  writeTextToFile(meta+markdown, noteFilePath)
   writeTextToFile(html, noteFilePath+".html")
-  writeTextToFile(meta+markdown, noteFilePath+'.md')
   // write attachments
   // for (const attachment of note.attachments()) {
   //   log(`exporting attachment: ${attachment.name}`)
@@ -88,7 +88,7 @@ function saveImages(markdown: string, noteFilePath: string): string {
  */
 const resolveFilePathUnique = (outputDir: string, fileName: string): string => {
   let counter = -1
-  let path = null
+  let path: string 
   do {
     if (++counter > 0) {
       const parts = parse(fileName)
