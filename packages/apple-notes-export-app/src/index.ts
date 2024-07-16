@@ -1,5 +1,6 @@
 import { exportNote as exportBoostnote } from "./exporters/boostnote"
 import { exportNote as exportTiddly } from "./exporters/tiddlywiki"
+import { exportNote as exportJoplin } from "./exporters/joplin"
 import { NotesApp } from "@activescott/apple-jsx-apps/notes"
 import { DispatchSemaphore } from "@activescott/apple-jsx"
 import { args } from "@activescott/apple-jsx/process"
@@ -13,11 +14,12 @@ import * as minimist from "minimist"
 
 /* eslint-disable no-console */
 
-type Exporter = "tiddlywiki" | "boostnote"
+type Exporter = "tiddlywiki" | "boostnote" | "joplin"
 // maps exporter name to exportNote function:
 const exporterNameMap = {
   boostnote: exportBoostnote,
   tiddlywiki: exportTiddly,
+  joplin: exportJoplin,
 }
 
 function showHelp(): void {
@@ -27,6 +29,7 @@ Usage: apple-notes-export <command> [options]
 Commands:
   apple-notes-export tiddlywiki  Exports the notes to tiddlywiki format
   apple-notes-export boostnote   Exports the notes to boostnote format
+  apple-notes-export joplin      Exports the notes to joplin format
 
 Options:
   -f, --filter  Specifies a regex to filter note names by
@@ -112,10 +115,11 @@ async function doExport(
   const filterExp = filter ? new RegExp(filter, "i") : null
   if (filter) log(`Applying note filter: ${filter}`)
   for (const folder of app.folders()) {
+    createDir(outputDir+'/'+folder.name)
     log("opening folder:", folder.name)
     for (const note of folder.notes()) {
       if (!filterExp || filterExp.test(note.name)) {
-        await exportNoteFunc(note, outputDir)
+        await exportNoteFunc(note, outputDir+'/'+folder.name)
       }
     }
   }
